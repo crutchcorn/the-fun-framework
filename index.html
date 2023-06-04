@@ -7,7 +7,11 @@
     <title>Vite + TS</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div data-island-comp="App">
+      <button data-on-click="updateCount()">Count</button>
+      <p data-bind="count"></p>
+<!--      <p>{{count}}</p>-->
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
