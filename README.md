@@ -16,7 +16,9 @@ Here's what my current code looks like:
 <!-- You can have multiple islands in one HTML file -->
 <div data-island-comp="App">
   <button data-on-click="updateCount()">Count</button>
-  <p data-bind="count"></p>
+  <p>Count: {{count.value}}</p>
+  <p data-if="count.value % 2 === 0">{{count.value}} is even</p>
+  <p data-if="count.value % 2 !== 0">{{count.value}} is odd</p>
 </div>
 ```
 
@@ -54,4 +56,5 @@ render();
 - [x] Handle method props and more in event listener function bind
 - [x] Support inline interpolation rather than `data-bind`
   - EG: `<p>Count is: {{count}}</p>`
-- [ ] Add `data-if` conditional rendering 
+- [x] Add `data-if` conditional rendering 
+  - [x] Add interpolation support in `data-if`

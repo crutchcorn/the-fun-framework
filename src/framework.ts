@@ -43,6 +43,33 @@ function walkExpression(exp: jsep.Expression, fn: (exp: jsep.Expression) => void
   })
 }
 
+/**
+ * Walks the expression, only persists the top-level identifiers
+ */
+function walkParentExpression(
+  parsedExp: jsep.Expression,
+  ignoredExps: jsep.Expression[],
+  listenerExps: jsep.Expression[],
+) {
+  walkExpression(parsedExp, (exp) => {
+    if (ignoredExps.includes(exp)) {
+      if (exp.type !== "MemberExpression") return;
+      ignoredExps.push(exp.object as jsep.Expression);
+      ignoredExps.push(exp.property as jsep.Expression);
+      return;
+    }
+    if (exp.type === "MemberExpression") {
+      listenerExps.push(exp.object as jsep.Expression);
+      ignoredExps.push(exp.property as jsep.Expression);
+      return;
+    }
+    if (exp.type === "Identifier") {
+      listenerExps.push(exp);
+      return;
+    }
+  });
+}
+
 function evaluateExpression(exp: jsep.Expression, data: Record<string, unknown>) {
   return staticEval.evaluate(exp, data);
 }
@@ -52,6 +79,9 @@ const isHTMLElement = (node: ChildNode): node is HTMLElement => node.nodeType ==
 const textBindRegex = /\{\{(.*?)\}\}/g;
 
 function bindAndHandleElement<T extends Record<string, unknown>>(node: ChildNode, data: T) {
+  if (node.nodeType === node.COMMENT_NODE ) {
+    return;
+  }
   if (node.nodeType === node.TEXT_NODE) {
     const dataKeys = Object.keys(data);
     const listenerExps = [] as jsep.Expression[];
@@ -59,24 +89,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(node: ChildNode
     node.nodeValue?.replace(textBindRegex, (substring, varName) => {
       const parsedExp = parseExpression(varName);
       const ignoredExps = [] as jsep.Expression[];
-      walkExpression(parsedExp, (exp) => {
-        if (ignoredExps.includes(exp)) {
-          if (exp.type !== "MemberExpression") return;
-          ignoredExps.push(exp.object as jsep.Expression);
-          ignoredExps.push(exp.property as jsep.Expression);
-          return;
-        }
-        if (listenerExps.includes(exp)) return;
-        if (exp.type === "MemberExpression") {
-          listenerExps.push(exp.object as jsep.Expression);
-          ignoredExps.push(exp.property as jsep.Expression);
-          return;
-        }
-        if (exp.type === "Identifier") {
-          listenerExps.push(exp);
-          return;
-        }
-      });
+      walkParentExpression(parsedExp, ignoredExps, listenerExps);
       return substring;
     });
 
@@ -89,26 +102,60 @@ function bindAndHandleElement<T extends Record<string, unknown>>(node: ChildNode
       })!;
     }
 
+    let boundListenerNames = [] as string[];
     for (let exp of listenerExps) {
-      if (exp.type !== "Identifier") continue;
       const name = exp.name as never;
+      if (boundListenerNames.includes(name)) continue;
       if (!dataKeys.includes(name)) continue;
       const state = data[name] as ReturnType<typeof createState>;
       state.listeners.push(updateText);
+      boundListenerNames.push(name);
     }
     updateText();
+    return;
   }
-  if (!isHTMLElement(node)) return;
-  const dataKeys = Object.keys(node.dataset);
-  for (let key of dataKeys) {
-    if (key.startsWith("on")) {
-      const name = key.replace(/^on([A-Z])/, (match) => match[2].toLowerCase())
-      let fnNameWithCall = node.dataset[key]!;
-      node.addEventListener(name, () => evaluateExpression(parseExpression(fnNameWithCall), data));
-      continue;
+  if (isHTMLElement(node)) {
+    const dataKeys = Object.keys(node.dataset);
+    for (let key of dataKeys) {
+      if (key.startsWith("on")) {
+        const name = key.replace(/^on([A-Z])/, (match) => match[2].toLowerCase())
+        let fnNameWithCall = node.dataset[key]!;
+        node.addEventListener(name, () => evaluateExpression(parseExpression(fnNameWithCall), data));
+        continue;
+      }
+      if (key.startsWith("if")) {
+        const expression = node.dataset[key]!;
+        const parsedExp = parseExpression(expression);
+        let listenerExps = [] as jsep.Expression[];
+        let ignoredExps = [] as jsep.Expression[];
+        walkParentExpression(parsedExp, ignoredExps, listenerExps);
+
+        const parent = node.parentNode!;
+        function checkAndConditionallyRender() {
+          const shouldKeep = evaluateExpression(parsedExp, data);
+          if (shouldKeep) {
+            parent.append(node);
+            return;
+          }
+          node.remove();
+        }
+
+        let boundListenerNames = [] as string[];
+        for (let exp of listenerExps) {
+          const name = exp.name as never;
+          if (boundListenerNames.includes(name)) continue;
+          if (!Object.keys(data).includes(name)) continue;
+          const state = data[name] as ReturnType<typeof createState>;
+          state.listeners.push(checkAndConditionallyRender);
+          boundListenerNames.push(name);
+        }
+        checkAndConditionallyRender();
+      }
     }
   }
 }
+
+let handledElements = new WeakSet<ChildNode>();
 
 function _render(compName: string, rootEl: HTMLElement) {
   const data = elements[compName]?.(rootEl);
@@ -116,7 +163,9 @@ function _render(compName: string, rootEl: HTMLElement) {
   // Roots cannot bind anything
   function bindAndHandleChildren(children: NodeListOf<ChildNode>) {
     for (let child of children) {
+      if (handledElements.has(child)) continue;
       bindAndHandleElement(child, data);
+      handledElements.add(child);
       if (child.childNodes.length) {
         bindAndHandleChildren(child.childNodes)
       }
