@@ -50,7 +50,8 @@ render();
 
 # TODOs
 
-- [ ] Handle inline state update in event listeners
-- [ ] Handle method props and more in event listener function bind
+- [x] Handle inline state update in event listeners
+- [x] Handle method props and more in event listener function bind
 - [ ] Support inline interpolation rather than `data-bind`
   - EG: `<p>Count is: {{count}}</p>`
+- [ ] Add `data-if` conditional rendering 

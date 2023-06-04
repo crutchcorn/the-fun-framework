@@ -1,4 +1,10 @@
-export function createState<T>(initialValue: T): {listeners: Array<() => void>, value: T} {
+import jsep from 'jsep';
+import jsepAssignment from '@jsep-plugin/assignment';
+jsep.plugins.register(jsepAssignment);
+
+import { BasicEval } from 'espression';
+
+export function createState<T>(initialValue: T): { listeners: Array<() => void>, value: T } {
   let val = initialValue;
   let listeners = [] as Array<() => void>;
   return {
@@ -15,24 +21,26 @@ export function createState<T>(initialValue: T): {listeners: Array<() => void>, 
 
 type Comp = (el: HTMLElement) => Record<string, unknown>;
 
-const elements = {
-} as Record<string, Comp>
+const elements = {} as Record<string, Comp>
 
 export function registerComponent(name: string, comp: Comp) {
   elements[name] = comp;
-};
+}
+
+const staticEval = new BasicEval();
+
+function parseExpression(expressionString: string, data: Record<string, unknown>): () => unknown {
+  const parseTree = jsep(expressionString);
+  return () => staticEval.evaluate(parseTree, data);
+}
 
 function bindAndHandleElement<T extends Record<string, unknown>>(el: HTMLElement, data: T) {
-  const dataKeys =Object.keys(el.dataset);
+  const dataKeys = Object.keys(el.dataset);
   for (let key of dataKeys) {
     if (key.startsWith("on")) {
       const name = key.replace(/^on([A-Z])/, (match) => match[2].toLowerCase())
       let fnNameWithCall = el.dataset[key]!;
-      // TODO: Parse props being passed, bind them to the `data` keyword
-      if (fnNameWithCall.endsWith("()")) {
-        fnNameWithCall = fnNameWithCall.slice(0, fnNameWithCall.length - 2);
-      }
-      el.addEventListener(name, data[fnNameWithCall as never] as () => void);
+      el.addEventListener(name, parseExpression(fnNameWithCall, data));
       continue;
     }
     if (key === "bind") {
@@ -47,6 +55,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(el: HTMLElement
 
 function _render(compName: string, rootEl: HTMLElement) {
   const data = elements[compName]?.(rootEl);
+
   // Roots cannot bind anything
   function bindAndHandleChildren(children: HTMLElement[]) {
     for (let child of children) {
@@ -56,6 +65,7 @@ function _render(compName: string, rootEl: HTMLElement) {
       }
     }
   }
+
   bindAndHandleChildren([...rootEl.children] as HTMLElement[]);
 }
 
