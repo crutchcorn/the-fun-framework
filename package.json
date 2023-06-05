@@ -9,7 +9,7 @@
   "bugs": {
     "url": "https://github.com/crutchcorn/the-fun-framework/issues"
   },
-  "homepage": "https://github.com/crutchcorn/the-fun-framework#readme",
+  "homepage": "https://crutchcorn.github.io/the-fun-framework/",
   "type": "commonjs",
   "scripts": {
     "dev": "vite",

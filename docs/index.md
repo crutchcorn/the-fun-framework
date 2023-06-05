@@ -17,7 +17,6 @@ titleTemplate: An experimental homegrown JS framework.
   <button data-on-click="updateCount()">Count</button>
   <p>Count: {{count.value}}</p>
   <p data-if="count.value % 2 === 0">{{count.value}} is even</p>
-  <p data-if="count.value % 2 !== 0">{{count.value}} is odd</p>
 </div>
 ```
 
