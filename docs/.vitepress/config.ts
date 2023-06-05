@@ -6,6 +6,7 @@ export default defineConfig({
   lang: "en-US",
   title: "The Fun Framework",
   description: description,
+  base: "/the-fun-framework",
   lastUpdated: true,
   head: [
     ["meta", { name: "theme-color", content: "#DBCAFF" }],
