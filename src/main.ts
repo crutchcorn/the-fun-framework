@@ -1,13 +1,7 @@
-import {
-  createState,
-  registerComponent,
-  render
-} from "./framework.ts";
+import { createState, registerComponent, render } from "./framework.ts";
 
 function App() {
-  let count = createState(
-    0
-  );
+  const count = createState(0);
 
   function updateCount() {
     count.value++;
@@ -15,8 +9,8 @@ function App() {
 
   return {
     count,
-    updateCount
-  }
+    updateCount,
+  };
 }
 
 registerComponent("App", App);
