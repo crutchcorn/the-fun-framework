@@ -1,0 +1,66 @@
+:root {
+    --vp-c-brand: #dd1f85;
+    --vp-c-brand-dark: #a32987;
+    --vp-c-brand-darker: #5d2f88;
+}
+
+html.dark {
+    --vp-c-brand: #ef68ad;
+    --vp-c-brand-dark: #ce46a3;
+    --vp-c-brand-darker: #af45cc;
+    --vp-button-brand-text: var(--vp-c-bg);
+    --vp-button-brand-hover-text: var(--vp-c-bg-elv);
+    --vp-button-brand-active-text: var(--vp-c-bg-elv-down);
+}
+
+:root {
+    --vp-home-hero-name-color: transparent;
+    --vp-home-hero-name-background: -webkit-linear-gradient(
+            120deg,
+            #ef68ad 30%,
+            #af45cc
+    );
+    --vp-home-hero-image-background-image: linear-gradient(
+            -45deg,
+            #ef68ad 30%,
+            #af45cc
+    );
+    --vp-home-hero-image-filter: blur(30px);
+}
+
+.dark {
+    --vp-home-hero-name-background: -webkit-linear-gradient(
+            120deg,
+            #ef68ad 30%,
+            #af45cc
+    );
+    --vp-home-hero-image-background-image: linear-gradient(
+            -45deg,
+            #ef68ad 30%,
+            #af45cc
+    );
+}
+
+@media (min-width: 640px) {
+    :root {
+        --vp-home-hero-image-filter: blur(56px);
+    }
+}
+
+@media (min-width: 960px) {
+    :root {
+        --vp-home-hero-image-filter: blur(72px);
+    }
+}
+
+.VPHome {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+}
+
+.VPHome > * {
+    margin: 1rem auto;
+    display: inline-block;
+}

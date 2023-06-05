@@ -1,6 +1,7 @@
 {
   "name": "the-fun-framework",
   "version": "0.0.1-alpha.0",
+  "description": "An experimental homegrown JS framework.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/crutchcorn/the-fun-framework.git"
@@ -16,6 +17,9 @@
     "preview": "vite preview",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -32,7 +36,9 @@
     "prettier": "^2.8.8",
     "typescript": "^5.0.2",
     "vite": "^4.3.9",
-    "vite-plugin-dts": "^2.3.0"
+    "vite-plugin-dts": "^2.3.0",
+    "vitepress": "^1.0.0-beta.1",
+    "vue": "^3.3.4"
   },
   "dependencies": {
     "@jsep-plugin/assignment": "^1.2.1",
