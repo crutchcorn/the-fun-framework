@@ -1,14 +1,35 @@
-# Framework Fun
+<div align="center">
+<h1>The Fun Framework</h1>
 
-This is an experimentation of building a homegrown JS framework with little/no dependencies (currently: 0).
+<a href="https://joypixels.com/profiles/emoji/playground-slide">
+  <img
+    height="80"
+    width="80"
+    alt="playground slide"
+    src="./other/slide.png"
+  />
+</a>
 
-While an unfinished design, I currently value:
+<p>An experimental homegrown JS framework.</p>
+
+</div>
+
+<div align="center">
+
+[![Build Status](https://img.shields.io/github/actions/workflow/status/crutchcorn/the-fun-framework/build.yml?branch=main)](https://github.com/crutchcorn/the-fun-framework/actions/workflows/validate.yml?query=branch%3Amain)
+[![Pre-release](https://img.shields.io/npm/v/the-fun-framework.svg)](https://npm.im/the-fun-framework)
+[![gzip size](https://img.badgesize.io/https://unpkg.com/the-fun-framework@latest/dist/the-fun-framework.cjs?compression=gzip)](https://unpkg.com/browse/the-fun-framework@latest/dist/the-fun-framework.cjs)
+[![license](https://badgen.now.sh/badge/license/MIT)](./LICENSE.md)
+
+</div>
+
+The goals of this project are:
 
 - HTML-first templating
 - No VDOM
 - Implicit re-renders (instead of calling an update function manually, "mutate")
 
-Here's what my current code looks like:
+## Usage
 
 ```html
 <!-- index.html -->
@@ -49,12 +70,3 @@ function App() {
 registerComponent("App", App);
 render();
 ``` 
-
-# TODOs
-
-- [x] Handle inline state update in event listeners
-- [x] Handle method props and more in event listener function bind
-- [x] Support inline interpolation rather than `data-bind`
-  - EG: `<p>Count is: {{count}}</p>`
-- [x] Add `data-if` conditional rendering 
-  - [x] Add interpolation support in `data-if`

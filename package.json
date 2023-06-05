@@ -1,8 +1,15 @@
 {
-  "name": "framework",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "the-fun-framework",
+  "version": "0.0.1-alpha.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crutchcorn/the-fun-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/crutchcorn/the-fun-framework/issues"
+  },
+  "homepage": "https://github.com/crutchcorn/the-fun-framework#readme",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -24,7 +31,8 @@
     "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
     "typescript": "^5.0.2",
-    "vite": "^4.3.9"
+    "vite": "^4.3.9",
+    "vite-plugin-dts": "^2.3.0"
   },
   "dependencies": {
     "@jsep-plugin/assignment": "^1.2.1",
@@ -39,5 +47,22 @@
     "node": ">=18.0.0",
     "npm": ">= 99999.0.0",
     "pnpm": ">= 8.0.0"
+  },
+  "types": "./dist/index.d.ts",
+  "module": "./dist/the-fun-framework.mjs",
+  "main": "./dist/the-fun-framework.cjs",
+  "files": [
+    "dist",
+    "lib",
+    "example",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/the-fun-framework.mjs",
+      "require": "./dist/the-fun-framework.cjs",
+      "default": "./dist/the-fun-framework.cjs"
+    }
   }
 }

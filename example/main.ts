@@ -1,4 +1,4 @@
-import { createState, registerComponent, render } from "./framework.ts";
+import { createState, registerComponent, render } from "the-fun-framework";
 
 function App() {
   const count = createState(0);
