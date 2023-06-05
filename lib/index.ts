@@ -24,12 +24,14 @@ export function createState<T>(initialValue: T): {
   };
 }
 
-type Comp = (el: HTMLElement) => Record<string, unknown>;
+export type FunComponent = ((el: HTMLElement) => Record<string, unknown>) & {
+  selector: string;
+};
 
-const elements = {} as Record<string, Comp>;
+const elements = {} as Record<string, FunComponent>;
 
-export function registerComponent(name: string, comp: Comp) {
-  elements[name] = comp;
+export function registerComponent(comp: FunComponent) {
+  elements[comp.selector] = comp;
 }
 
 const staticEval = new BasicEval();

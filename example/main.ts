@@ -13,5 +13,7 @@ function App() {
   };
 }
 
-registerComponent("App", App);
+App.selector = "App";
+
+registerComponent(App);
 render();

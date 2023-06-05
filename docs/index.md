@@ -44,7 +44,8 @@ function App() {
 }
 
 // Register with the same name as `data-island-comp`
-registerComponent("App", App);
+App.selector = "App";
+registerComponent(App);
 render();
 ``` 
 </div>

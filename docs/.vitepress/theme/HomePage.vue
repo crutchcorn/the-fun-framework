@@ -15,9 +15,11 @@ function App() {
     };
 }
 
+App.selector = "App";
+
 onMounted(() => {
     nextTick(() => {
-        registerComponent("App", App);
+        registerComponent(App);
         render();
     })
 })
