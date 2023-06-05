@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["lib/**/*.spec.tsx", "lib/**/*.spec.ts"],
+  "compilerOptions": {
+    "noEmit": false,
+    "composite": true,
+    "paths": {
+      "the-fun-framework": ["./lib"]
+    }
+  }
+}

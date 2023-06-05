@@ -17,6 +17,7 @@
 <div align="center">
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/crutchcorn/the-fun-framework/build.yml?branch=main)](https://github.com/crutchcorn/the-fun-framework/actions/workflows/validate.yml?query=branch%3Amain)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/crutchcorn/the-fun-framework/test.yml?branch=main&label=tests)](https://github.com/crutchcorn/the-fun-framework/actions/workflows/validate.yml?query=branch%3Amain)
 [![Pre-release](https://img.shields.io/npm/v/the-fun-framework.svg)](https://npm.im/the-fun-framework)
 [![gzip size](https://img.badgesize.io/https://unpkg.com/the-fun-framework@latest/dist/the-fun-framework.cjs?compression=gzip)](https://unpkg.com/browse/the-fun-framework@latest/dist/the-fun-framework.cjs)
 [![license](https://badgen.now.sh/badge/license/MIT)](./LICENSE.md)

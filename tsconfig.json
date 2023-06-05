@@ -20,5 +20,5 @@
   },
   "include": ["lib", "example"],
   "exclude": ["*.spec.tsx", "*.spec.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.spec.json" }]
 }
