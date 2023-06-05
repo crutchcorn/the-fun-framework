@@ -29,6 +29,12 @@ The goals of this project are:
 - No VDOM
 - Implicit re-renders (instead of calling an update function manually, "mutate")
 
+## Installation
+
+```shell
+npm install the-fun-framework
+```
+
 ## Usage
 
 ```html
@@ -48,7 +54,7 @@ import {
   createState,
   registerComponent,
   render
-} from "./framework.ts";
+} from "the-fun-framework";
 
 function App() {
   let count = createState(

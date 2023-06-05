@@ -26,7 +26,7 @@ import {
   createState,
   registerComponent,
   render
-} from "./framework.ts";
+} from "the-fun-framework";
 
 function App() {
   let count = createState(
