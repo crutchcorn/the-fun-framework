@@ -81,21 +81,16 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         // item.key
         const keyExpression = node.dataset.key!;
         const parsedListExp = parseExpression(listExpression);
+        // item
+        const itemVarName = parsedListExp.body.shift().name as string;
+        // of
+        const _ofOrIn = parsedListExp.body.shift().name;
+
+        const list: Array<unknown> = evaluateExpression(parsedListExp, data);
+        if (!Array.isArray(list)) throw "You must bind `data-for` to an array";
+
         const listenerListExps = [] as Expression[];
         walkParentExpression(parsedListExp, [], listenerListExps);
-        let list!: Array<unknown>;
-        let itemVarName!: string;
-        for (const exp of listenerListExps) {
-          const name = exp.name as never;
-          if (Object.keys(data).includes(name)) {
-            // TODO: This doesn't work with `createState`
-            list = data[name] as Array<unknown>;
-            if (!Array.isArray(list))
-              throw "You must bind `data-for` to an array";
-          } else if (name !== "of" && name !== "in") {
-            itemVarName = name;
-          }
-        }
 
         const keyExp = parseExpression(keyExpression);
 
@@ -136,9 +131,18 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           }
           parent.replaceChildren(...newEls);
         }
-        if (list.listeners) {
-          list.listeners.push(extractKeysAndRerender);
+
+        const boundListenerNames = [] as string[];
+        
+        for (const exp of listenerListExps) {
+          const name = exp.name as never;
+          if (boundListenerNames.includes(name)) continue;
+          if (!Object.keys(data).includes(name)) continue;
+          const state = data[name] as ReturnType<typeof createState>;
+          state.listeners.push(extractKeysAndRerender);
+          boundListenerNames.push(name);
         }
+
         extractKeysAndRerender();
         return false;
       }

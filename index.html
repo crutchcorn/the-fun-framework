@@ -14,8 +14,9 @@
       <p data-if="count.value % 2 !== 0">{{count.value}} is odd</p>
       <h1>Names</h1>
       <ul>
-        <li data-for="item of list" data-key="item.key">{{item.name}}</li>
+        <li data-for="item of list.value" data-key="item.key">{{item.name}}</li>
       </ul>
+      <button data-on-click="addPerson()">Add person</button>
     </div>
     <script type="module" src="/example/main.ts"></script>
   </body>
