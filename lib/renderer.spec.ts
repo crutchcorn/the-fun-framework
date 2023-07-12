@@ -7,6 +7,26 @@ import { findByText, getByText, queryByText } from "@testing-library/dom";
 const user = userEvent.setup();
 
 describe("render", () => {
+  test("should support rendering static values", async () => {
+    document.body.innerHTML = `
+       <div data-island-comp="App">
+        <p>{{message}}</p>
+      </div>
+    `;
+
+    function App() {
+      return {
+        message: "Hello, world",
+      };
+    }
+
+    App.selector = "App";
+
+    registerComponent(App);
+    render();
+    expect(await findByText(document.body, "Hello, world")).toBeTruthy();
+  });
+
   test("should support rendered values and updating them", async () => {
     document.body.innerHTML = `
        <div data-island-comp="App">
@@ -105,5 +125,30 @@ describe("render", () => {
     expect(
       await findByText(document.body, "Count is greater than 0")
     ).toBeTruthy();
+  });
+
+  test("should support for loop rendering", async () => {
+    document.body.innerHTML = `
+       <div data-island-comp="App">
+        <p data-for="item of items" data-key="item.key">{{item.val}}</p>
+      </div>
+    `;
+
+    function App() {
+      return {
+        items: [
+          { key: 1, val: "Hello" },
+          { key: 2, val: "Goodbye" },
+        ],
+      };
+    }
+
+    App.selector = "App";
+
+    registerComponent(App);
+    render();
+
+    expect(await findByText(document.body, "Hello")).toBeTruthy();
+    expect(await findByText(document.body, "Goodbye")).toBeTruthy();
   });
 });

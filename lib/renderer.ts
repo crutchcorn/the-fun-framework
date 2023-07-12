@@ -23,7 +23,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
   data: T
 ): boolean {
   if (node.nodeType === node.COMMENT_NODE) {
-    return;
+    return true;
   }
   if (node.nodeType === node.TEXT_NODE) {
     const dataKeys = Object.keys(data);
@@ -60,7 +60,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
       }
     }
     updateText();
-    return;
+    return true;
   }
   if (isHTMLElement(node)) {
     const dataKeys = Object.keys(node.dataset);
@@ -82,9 +82,10 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         const keyExpression = node.dataset.key!;
         const parsedListExp = parseExpression(listExpression);
         // item
-        const itemVarName = parsedListExp.body.shift().name as string;
+        const itemVarName = (parsedListExp.body! as Expression[]).shift()!
+          .name as string;
         // of
-        const _ofOrIn = parsedListExp.body.shift().name;
+        const _ofOrIn = (parsedListExp.body! as Expression[]).shift()!.name;
 
         const listenerListExps = [] as Expression[];
         walkParentExpression(parsedListExp, [], listenerListExps);
@@ -117,7 +118,9 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           const keys = extractKeys();
           const newEls: HTMLElement[] = [];
           for (const { val, key } of keys) {
-            let child = parent.querySelector(`[data-specific-key="${key}"]`);
+            let child = parent.querySelector(
+              `[data-specific-key="${key}"]`
+            ) as HTMLElement;
             if (!child) {
               const el = document.createElement("div");
               el.innerHTML = template;
@@ -143,6 +146,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           if (boundListenerNames.includes(name)) continue;
           if (!Object.keys(data).includes(name)) continue;
           const state = data[name] as ReturnType<typeof createState>;
+          if (!state.listeners) continue;
           state.listeners.push(extractKeysAndRerender);
           boundListenerNames.push(name);
         }
@@ -162,7 +166,10 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         function checkAndConditionallyRender() {
           const shouldKeep = evaluateExpression(parsedExp, data);
           if (shouldKeep) {
-            previousSibling.insertAdjacentElement("afterend", node);
+            previousSibling.insertAdjacentElement(
+              "afterend",
+              node as HTMLElement
+            );
             return;
           }
           node.remove();
@@ -174,6 +181,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           if (boundListenerNames.includes(name)) continue;
           if (!Object.keys(data).includes(name)) continue;
           const state = data[name] as ReturnType<typeof createState>;
+          if (!state.listeners) continue;
           state.listeners.push(checkAndConditionallyRender);
           boundListenerNames.push(name);
         }
@@ -188,12 +196,12 @@ const handledElements = new WeakSet<ChildNode>();
 
 // Roots cannot bind anything
 function bindAndHandleChildren(
-  children: NodeListOf<ChildNode>,
+  children: NodeListOf<ChildNode> | HTMLElement[],
   data: Record<string, unknown> | undefined
 ) {
   for (const child of children) {
     if (handledElements.has(child)) continue;
-    const shouldBindChildren = bindAndHandleElement(child, data);
+    const shouldBindChildren = bindAndHandleElement(child, data!);
     handledElements.add(child);
     if (shouldBindChildren && child.childNodes.length) {
       bindAndHandleChildren(child.childNodes, data);
