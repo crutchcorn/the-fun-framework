@@ -117,17 +117,20 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           const keys = extractKeys();
           const newEls: HTMLElement[] = [];
           for (const { val, key } of keys) {
-            const el = document.createElement("div");
-            el.innerHTML = template;
-            const child = el.firstElementChild as HTMLElement;
-            child.removeAttribute("data-for");
-            child.removeAttribute("data-key");
-            // Needed for reconcilation
-            child.setAttribute("data-specific-key", key);
-            bindAndHandleChildren([child], {
-              ...data,
-              [itemVarName]: val,
-            });
+            let child = parent.querySelector(`[data-specific-key="${key}"]`);
+            if (!child) {
+              const el = document.createElement("div");
+              el.innerHTML = template;
+              child = el.firstElementChild as HTMLElement;
+              child.removeAttribute("data-for");
+              child.removeAttribute("data-key");
+              // Needed for reconciliation
+              child.setAttribute("data-specific-key", key);
+              bindAndHandleChildren([child], {
+                ...data,
+                [itemVarName]: val,
+              });
+            }
             newEls.push(child);
           }
           parent.replaceChildren(...newEls);
