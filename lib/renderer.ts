@@ -86,9 +86,6 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         // of
         const _ofOrIn = parsedListExp.body.shift().name;
 
-        const list: Array<unknown> = evaluateExpression(parsedListExp, data);
-        if (!Array.isArray(list)) throw "You must bind `data-for` to an array";
-
         const listenerListExps = [] as Expression[];
         walkParentExpression(parsedListExp, [], listenerListExps);
 
@@ -96,6 +93,10 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
 
         function extractKeys() {
           const keys: Array<{ key: string; val: unknown }> = [];
+
+          const list: Array<unknown> = evaluateExpression(parsedListExp, data);
+          if (!Array.isArray(list))
+            throw "You must bind `data-for` to an array";
 
           for (const item of list) {
             keys.push({
@@ -133,7 +134,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         }
 
         const boundListenerNames = [] as string[];
-        
+
         for (const exp of listenerListExps) {
           const name = exp.name as never;
           if (boundListenerNames.includes(name)) continue;
