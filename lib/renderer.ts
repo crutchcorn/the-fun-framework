@@ -21,7 +21,7 @@ const textBindRegex = /\{\{(.*?)\}\}/g;
 function bindAndHandleElement<T extends Record<string, unknown>>(
   node: ChildNode,
   data: T
-) {
+): boolean {
   if (node.nodeType === node.COMMENT_NODE) {
     return;
   }
@@ -54,7 +54,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
       if (boundListenerNames.includes(name)) continue;
       if (!dataKeys.includes(name)) continue;
       const state = data[name] as ReturnType<typeof createState>;
-      state.listeners.push(updateText);
+      state.listeners && state.listeners.push(updateText);
       boundListenerNames.push(name);
     }
     updateText();
@@ -86,6 +86,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         for (const exp of listenerListExps) {
           const name = exp.name as never;
           if (Object.keys(data).includes(name)) {
+            // TODO: This doesn't work with `createState`
             list = data[name] as Array<unknown>;
             if (!Array.isArray(list))
               throw "You must bind `data-for` to an array";
@@ -93,18 +94,46 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
             itemVarName = name;
           }
         }
-        const keys: string[] = [];
 
-        for (const item of list) {
-          keys.push(
-            evaluateExpression(parseExpression(keyExpression), {
-              ...data,
-              [itemVarName]: item,
-            })
-          );
+        const keyExp = parseExpression(keyExpression);
+
+        function extractKeys() {
+          const keys: Array<{ key: string; val: unknown }> = [];
+
+          for (const item of list) {
+            keys.push({
+              key: evaluateExpression(keyExp, {
+                ...data,
+                [itemVarName]: item,
+              }),
+              val: item,
+            });
+          }
+          return keys;
         }
 
-        debugger;
+        /**
+         * TODO: Add `data-for` state listeners that will re-run this rendering
+         *  and key extractions. AKA use list and check if it's an `createState`.
+         */
+        const keys = extractKeys();
+        const template = node.outerHTML;
+        const parent = node.parentElement!;
+        const newEls: HTMLElement[] = [];
+        for (const { val } of keys) {
+          const el = document.createElement("div");
+          el.innerHTML = template;
+          const child = el.firstElementChild as HTMLElement;
+          child.removeAttribute("data-for");
+          child.removeAttribute("data-key");
+          bindAndHandleChildren([child], {
+            ...data,
+            [itemVarName]: val,
+          });
+          newEls.push(child);
+        }
+        parent.replaceChildren(...newEls);
+        return false;
       }
       if (key.startsWith("if")) {
         const expression = node.dataset[key]!;
@@ -136,26 +165,30 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
       }
     }
   }
+  return true;
 }
 
 const handledElements = new WeakSet<ChildNode>();
 
+// Roots cannot bind anything
+function bindAndHandleChildren(
+  children: NodeListOf<ChildNode>,
+  data: Record<string, unknown> | undefined
+) {
+  for (const child of children) {
+    if (handledElements.has(child)) continue;
+    const shouldBindChildren = bindAndHandleElement(child, data);
+    handledElements.add(child);
+    if (shouldBindChildren && child.childNodes.length) {
+      bindAndHandleChildren(child.childNodes, data);
+    }
+  }
+}
+
 function _render(compName: string, rootEl: HTMLElement) {
   const data = elements[compName]?.(rootEl);
 
-  // Roots cannot bind anything
-  function bindAndHandleChildren(children: NodeListOf<ChildNode>) {
-    for (const child of children) {
-      if (handledElements.has(child)) continue;
-      bindAndHandleElement(child, data);
-      handledElements.add(child);
-      if (child.childNodes.length) {
-        bindAndHandleChildren(child.childNodes);
-      }
-    }
-  }
-
-  bindAndHandleChildren(rootEl.childNodes);
+  bindAndHandleChildren(rootEl.childNodes, data);
 }
 
 export function render() {
