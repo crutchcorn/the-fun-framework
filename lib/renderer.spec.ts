@@ -152,6 +152,67 @@ describe("render", () => {
     expect(await findByText(document.body, "Goodbye")).toBeTruthy();
   });
 
+  test("should support for loop rendering with other elements present", async () => {
+    document.body.innerHTML = `
+       <div data-island-comp="App">
+       <div>Before</div>
+        <p data-for="item of items" data-key="item.key">{{item.val}}</p>
+        <div>After</div>
+      </div>
+    `;
+
+    function App() {
+      return {
+        items: [
+          { key: 1, val: "Hello" },
+          { key: 2, val: "Goodbye" },
+        ],
+      };
+    }
+
+    App.selector = "App";
+
+    registerComponent(App);
+    render();
+
+    expect(await findByText(document.body, "Before")).toBeTruthy();
+    expect(await findByText(document.body, "Hello")).toBeTruthy();
+    expect(await findByText(document.body, "Goodbye")).toBeTruthy();
+    expect(await findByText(document.body, "After")).toBeTruthy();
+  });
+
+  test("should support for loop rendering two loops side-by-side", async () => {
+    document.body.innerHTML = `
+       <div data-island-comp="App">
+        <p data-for="item of otheritems" data-key="item.key">{{item.val}}</p>
+        <p data-for="item of items" data-key="item.key">{{item.val}}</p>
+      </div>
+    `;
+
+    function App() {
+      return {
+        items: [
+          { key: 1, val: "Hello" },
+          { key: 2, val: "Goodbye" },
+        ],
+        otheritems: [
+          { key: 1, val: "Other" },
+          { key: 2, val: "One" },
+        ],
+      };
+    }
+
+    App.selector = "App";
+
+    registerComponent(App);
+    render();
+
+    expect(await findByText(document.body, "Hello")).toBeTruthy();
+    expect(await findByText(document.body, "Goodbye")).toBeTruthy();
+    expect(await findByText(document.body, "Other")).toBeTruthy();
+    expect(await findByText(document.body, "One")).toBeTruthy();
+  });
+
   test("should support for dynamic loop rendering", async () => {
     document.body.innerHTML = `
        <div data-island-comp="App">

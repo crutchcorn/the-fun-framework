@@ -113,14 +113,30 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
 
         const template = node.outerHTML;
         const parent = node.parentElement!;
+        const listStart = document.createComment("List start");
+        const listEnd = document.createComment("List end");
+        parent.insertBefore(listStart, node.previousSibling);
+        parent.insertBefore(listEnd, node.nextSibling);
 
         function extractKeysAndRerender() {
           const keys = extractKeys();
           const newEls: HTMLElement[] = [];
+          const childNodes = [...parent.childNodes];
+          const listStartIndex = childNodes.indexOf(listStart);
+          const listEndIndex = childNodes.indexOf(listEnd);
           for (const { val, key } of keys) {
-            let child = parent.querySelector(
-              `[data-specific-key="${key}"]`
-            ) as HTMLElement;
+            let child = childNodes.find((child, i) => {
+              if (i < listStartIndex) return false;
+              if (i > listEndIndex) return false;
+              if (!isHTMLElement(child)) return false;
+              if (child.dataset.for === listExpression) {
+                if (child.dataset.key === key) {
+                  newEls.push(child);
+                  return true;
+                }
+              }
+              return false;
+            }) as HTMLElement | undefined;
             if (!child) {
               const el = document.createElement("div");
               el.innerHTML = template;
@@ -136,7 +152,29 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
             }
             newEls.push(child);
           }
-          parent.replaceChildren(...newEls);
+
+          const dynamicChildren = childNodes
+            .slice(listStartIndex + 1, listEndIndex)
+            .filter(isHTMLElement);
+          const childOrNewElsLength = Math.max(
+            dynamicChildren.length,
+            newEls.length
+          );
+          for (let i = 0; i < childOrNewElsLength; i++) {
+            const child = dynamicChildren[i];
+            const newEl = newEls[i];
+            if (
+              child &&
+              newEl &&
+              child.dataset.specificKey === newEl.dataset.specificKey
+            )
+              continue;
+            if (child) {
+              child.replaceWith(newEl);
+            } else if (newEl) {
+              parent.insertBefore(newEl, listEnd);
+            }
+          }
         }
 
         const boundListenerNames = [] as string[];
