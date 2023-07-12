@@ -54,7 +54,7 @@ describe("render", () => {
     render();
 
     expect(await findByText(document.body, "Count: 0")).toBeTruthy();
-    user.click(getByText(document.body, "Add"));
+    await user.click(getByText(document.body, "Add"));
     expect(await findByText(document.body, "Count: 1")).toBeTruthy();
   });
 
@@ -121,7 +121,7 @@ describe("render", () => {
     render();
 
     expect(await findByText(document.body, "Count is 0")).toBeTruthy();
-    user.click(getByText(document.body, "Add"));
+    await user.click(getByText(document.body, "Add"));
     expect(
       await findByText(document.body, "Count is greater than 0")
     ).toBeTruthy();
@@ -150,5 +150,59 @@ describe("render", () => {
 
     expect(await findByText(document.body, "Hello")).toBeTruthy();
     expect(await findByText(document.body, "Goodbye")).toBeTruthy();
+  });
+
+  test("should support for dynamic loop rendering", async () => {
+    document.body.innerHTML = `
+       <div data-island-comp="App">
+        <div>
+          <p data-for="person of people.value" data-key="person.key">{{person.name}}</p>
+        </div>
+        <button data-on-click="addPerson()">Add person</button>
+      </div>
+    `;
+
+    function App() {
+      const people = createState([
+        {
+          name: "Corbin",
+          key: "corbin",
+        },
+        {
+          name: "Ade",
+          key: "ade",
+        },
+      ]);
+
+      let personCount = 0;
+      function addPerson() {
+        const newList = [...people.value];
+        ++personCount;
+        newList.push({
+          name: `Person ${personCount}`,
+          key: `person_${personCount}`,
+        });
+        people.value = newList;
+      }
+
+      return {
+        people,
+        addPerson,
+      };
+    }
+
+    App.selector = "App";
+
+    registerComponent(App);
+    render();
+
+    expect(await findByText(document.body, "Corbin")).toBeTruthy();
+    expect(await findByText(document.body, "Ade")).toBeTruthy();
+    await user.click(getByText(document.body, "Add person"));
+    expect(await findByText(document.body, "Person 1")).toBeTruthy();
+    await user.click(getByText(document.body, "Add person"));
+    expect(await findByText(document.body, "Person 2")).toBeTruthy();
+    await user.click(getByText(document.body, "Add person"));
+    expect(await findByText(document.body, "Person 3")).toBeTruthy();
   });
 });
