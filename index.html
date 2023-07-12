@@ -12,6 +12,10 @@
       <p>Count: {{count.value}}</p>
       <p data-if="count.value % 2 === 0">{{count.value}} is even</p>
       <p data-if="count.value % 2 !== 0">{{count.value}} is odd</p>
+      <h1>Names</h1>
+      <ul>
+        <li data-for="item of list" data-key="item.key">{{item.name}}</li>
+      </ul>
     </div>
     <script type="module" src="/example/main.ts"></script>
   </body>

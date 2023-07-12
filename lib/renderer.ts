@@ -73,6 +73,39 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         );
         continue;
       }
+      if (key.startsWith("for")) {
+        // "item of list"
+        const listExpression = node.dataset[key]!;
+        // item.key
+        const keyExpression = node.dataset.key!;
+        const parsedListExp = parseExpression(listExpression);
+        const listenerListExps = [] as Expression[];
+        walkParentExpression(parsedListExp, [], listenerListExps);
+        let list!: Array<unknown>;
+        let itemVarName!: string;
+        for (const exp of listenerListExps) {
+          const name = exp.name as never;
+          if (Object.keys(data).includes(name)) {
+            list = data[name] as Array<unknown>;
+            if (!Array.isArray(list))
+              throw "You must bind `data-for` to an array";
+          } else if (name !== "of" && name !== "in") {
+            itemVarName = name;
+          }
+        }
+        const keys: string[] = [];
+
+        for (const item of list) {
+          keys.push(
+            evaluateExpression(parseExpression(keyExpression), {
+              ...data,
+              [itemVarName]: item,
+            })
+          );
+        }
+
+        debugger;
+      }
       if (key.startsWith("if")) {
         const expression = node.dataset[key]!;
         const parsedExp = parseExpression(expression);
