@@ -142,11 +142,12 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         const ignoredExps = [] as Expression[];
         walkParentExpression(parsedExp, ignoredExps, listenerExps);
 
-        const parent = node.parentNode!;
+        // TODO: This won't work if the previous sibling also changes or whatnot
+        const previousSibling = node.previousElementSibling as HTMLElement;
         function checkAndConditionallyRender() {
           const shouldKeep = evaluateExpression(parsedExp, data);
           if (shouldKeep) {
-            parent.append(node);
+            previousSibling.insertAdjacentElement("afterend", node);
             return;
           }
           node.remove();
