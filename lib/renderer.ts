@@ -54,8 +54,10 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
       if (boundListenerNames.includes(name)) continue;
       if (!dataKeys.includes(name)) continue;
       const state = data[name] as ReturnType<typeof createState>;
-      state.listeners && state.listeners.push(updateText);
-      boundListenerNames.push(name);
+      if (state.listeners) {
+        state.listeners.push(updateText);
+        boundListenerNames.push(name);
+      }
     }
     updateText();
     return;
@@ -112,27 +114,32 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
           return keys;
         }
 
-        /**
-         * TODO: Add `data-for` state listeners that will re-run this rendering
-         *  and key extractions. AKA use list and check if it's an `createState`.
-         */
-        const keys = extractKeys();
         const template = node.outerHTML;
         const parent = node.parentElement!;
-        const newEls: HTMLElement[] = [];
-        for (const { val } of keys) {
-          const el = document.createElement("div");
-          el.innerHTML = template;
-          const child = el.firstElementChild as HTMLElement;
-          child.removeAttribute("data-for");
-          child.removeAttribute("data-key");
-          bindAndHandleChildren([child], {
-            ...data,
-            [itemVarName]: val,
-          });
-          newEls.push(child);
+
+        function extractKeysAndRerender() {
+          const keys = extractKeys();
+          const newEls: HTMLElement[] = [];
+          for (const { val, key } of keys) {
+            const el = document.createElement("div");
+            el.innerHTML = template;
+            const child = el.firstElementChild as HTMLElement;
+            child.removeAttribute("data-for");
+            child.removeAttribute("data-key");
+            // Needed for reconcilation
+            child.setAttribute("data-specific-key", key);
+            bindAndHandleChildren([child], {
+              ...data,
+              [itemVarName]: val,
+            });
+            newEls.push(child);
+          }
+          parent.replaceChildren(...newEls);
         }
-        parent.replaceChildren(...newEls);
+        if (list.listeners) {
+          list.listeners.push(extractKeysAndRerender);
+        }
+        extractKeysAndRerender();
         return false;
       }
       if (key.startsWith("if")) {
