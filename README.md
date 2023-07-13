@@ -43,6 +43,31 @@ npm install the-fun-framework
 
 <!-- You can have multiple islands in one HTML file -->
 <div data-island-comp="App">
+  <p>{{message}}</p>
+</div>
+```
+
+```typescript
+// index.ts
+import { createState, registerComponent, render } from "the-fun-framework";
+
+function App() {
+  return {
+    message: "Hello, world",
+  };
+}
+
+// Register with the same name as `data-island-comp`
+App.selector = "App";
+registerComponent(App);
+render();
+```
+
+### Conditional Display
+
+```html
+<!-- index.html -->
+<div data-island-comp="Counter">
   <button data-on-click="updateCount()">Count</button>
   <p>Count: {{count.value}}</p>
   <p data-if="count.value % 2 === 0">{{count.value}} is even</p>
@@ -51,16 +76,10 @@ npm install the-fun-framework
 
 ```typescript
 // index.ts
-import {
-  createState,
-  registerComponent,
-  render
-} from "the-fun-framework";
+import { createState, registerComponent, render } from "the-fun-framework";
 
-function App() {
-  let count = createState(
-    0
-  );
+function Counter() {
+  let count = createState(0);
 
   function updateCount() {
     count.value++;
@@ -68,12 +87,61 @@ function App() {
 
   return {
     count,
-    updateCount
-  }
+    updateCount,
+  };
 }
 
 // Register with the same name as `data-island-comp`
-App.selector = "App";
-registerComponent(App);
+Counter.selector = "Counter";
+registerComponent(Counter);
 render();
-``` 
+```
+
+### Loop Display
+
+```html
+<!-- index.html -->
+<div data-island-comp="People">
+  <h1>Names</h1>
+  <ul>
+    <li data-for="item of list.value" data-key="item.key">{{item.name}}</li>
+  </ul>
+  <button data-on-click="addPerson()">Add person</button>
+</div>
+```
+
+```typescript
+// index.ts
+function People() {
+  const list = createState([
+    {
+      name: "Corbin",
+      key: "corbin",
+    },
+    {
+      name: "Ade",
+      key: "ade",
+    },
+  ]);
+
+  let personCount = 0;
+  function addPerson() {
+    const newList = [...list.value];
+    ++personCount;
+    newList.push({
+      name: `Person ${personCount}`,
+      key: `person_${personCount}`,
+    });
+    list.value = newList;
+  }
+
+  return {
+    list,
+    addPerson,
+  };
+}
+
+People.selector = "People";
+registerComponent(People);
+render();
+```
