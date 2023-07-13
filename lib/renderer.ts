@@ -115,7 +115,7 @@ function bindAndHandleElement<T extends Record<string, unknown>>(
         const parent = node.parentElement!;
         const listStart = document.createComment("List start");
         const listEnd = document.createComment("List end");
-        parent.insertBefore(listStart, node.previousSibling);
+        parent.insertBefore(listStart, node);
         parent.insertBefore(listEnd, node.nextSibling);
 
         function extractKeysAndRerender() {
