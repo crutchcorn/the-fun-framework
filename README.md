@@ -1,14 +1,5 @@
 <div align="center">
-<h1>The Fun Framework</h1>
-
-<a href="https://joypixels.com/profiles/emoji/playground-slide">
-  <img
-    height="80"
-    width="80"
-    alt="playground slide"
-    src="./other/slide.png"
-  />
-</a>
+<img width="250px" height="250px" src="https://raw.githubusercontent.com/kazewaze/assets-holder/main/fun-framework.svg" alt="The Fun Framework Logo"/>
 
 <p>An experimental homegrown JS framework.</p>
 
